@@ -1,3 +1,21 @@
-- install deepface
-- Process all images and write a csv file which has columns (File name, Gender, race, age)
-- Defaults: Unknown & Age -1
+Datathon – 12/22/2023
+
+Download faceimages.zip from Canvas and unzip
+
+Install deepface https://github.com/serengil/deepfaceLinks to an external site.
+
+Your script should process all images (with default) in the faceimages folder and finally write a CSV file which has columns as shown below:
+
+                    Filename  |  Gender | Race/ethnicity | Age
+
+Row1         
+
+Row2
+
+….
+
+Row 110
+
+ 
+
+Filler: Gender “unknown”, Race “unknown”, Age -1
