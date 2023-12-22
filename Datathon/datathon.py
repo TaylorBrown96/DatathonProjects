@@ -51,8 +51,7 @@ def writeCSV(results_dict):
             f.write(f'{filename},{age},{gender},{race}\n')
 
 # Main function that calls the other functions to get the results for the images in the folder and write them to a csv file
-def main():
-    folderName = 'faceimages'
+def main(folderName='faceimages'):
     images = get_image_names(folderName)
     
     results_dict = {}
