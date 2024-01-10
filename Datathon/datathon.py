@@ -113,6 +113,7 @@ def main(folderName='faceimages'):
         index += 1
         
         heatmap_overlay(image)
+        bounding_box(image, results_dict)
         
     writeCSV(results_dict)
 
@@ -127,14 +128,47 @@ def heatmap_overlay(image_path):
     
     blur = cv2.GaussianBlur(th,(13,13), 11)
     
-    heatmap_img = cv2.applyColorMap(blur, cv2.COLORMAP_JET)
+    heatmap_img = cv2.applyColorMap(blur, cv2.COLORMAP_TURBO)
     super_imposed_img = cv2.addWeighted(heatmap_img, 0.5, img, 0.5, 0)
     
-    cv2.imwrite(os.path.join(os.getcwd(), image_path.replace('faceimages','faceimages-heatmap')), super_imposed_img)
+    cv2.imwrite(os.path.join(os.getcwd(), image_path.replace('faceimages','faceimages-heatmap')).replace('.png','_heatmapped.png'), super_imposed_img)
     cv2.imshow('image', super_imposed_img)
-    cv2.waitKey(1500)
+    cv2.waitKey(10)
     cv2.destroyAllWindows()
     
-      
+# Draw bounding box around face
+def bounding_box(image_path, results):
+    img = cv2.imread(image_path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    
+    for value in results.items():
+            age = value[1]['age']
+            try:
+                gender = max(value[1]['gender'], key=value[1]['gender'].get)
+                genderValue = max(value[1]['gender'].values())
+            except:
+                gender = "Unknown"
+                genderValue = 0
+            try:
+                race = max(value[1]['race'], key=value[1]['race'].get)
+                raceValue = max(value[1]['race'].values())
+            except:
+                race = "Unknown"
+                raceValue = 0
+    try:
+        for (x, y, w, h) in faces:
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 5)
+        cv2.putText(img, f'[Age:{age}] [{gender}{genderValue:0.4f}] [{race}{raceValue:0.4f}]', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+    except:
+        print(TextColors.RED + 'Error: ' +TextColors.END+ 'Could not place boundingbox'+ f' of person in {os.path.basename(image_path)}.')
+    
+    cv2.imwrite(os.path.join(os.getcwd(), image_path.replace('faceimages','faceimages-heatmap')).replace('.png','_boundingbox.png'), img)
+    cv2.imshow('image', img)
+    cv2.waitKey(10)
+    cv2.destroyAllWindows()
+
 if __name__ == "__main__":
     main()
