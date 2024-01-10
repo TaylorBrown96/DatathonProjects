@@ -1,5 +1,6 @@
 from deepface import DeepFace
 import os
+import cv2
 from tqdm import tqdm
 
 
@@ -110,9 +111,30 @@ def main(folderName='faceimages'):
         age, gender, race = gather_results(index, len(images), image)
         results_dict[image] = {'age': age, 'gender': gender, 'race': race}
         index += 1
-    
-    writeCSV(results_dict)
         
+        heatmap_overlay(image)
+        
+    writeCSV(results_dict)
+
+# Overlay heatmap on image and save to folder faceimages-heatmap
+def heatmap_overlay(image_path):
+    img = cv2.imread(image_path)
+    img = cv2.resize(img, (500, 500))
     
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    a_component = lab[:,:,1]
+    th = cv2.threshold(a_component,140,224,cv2.THRESH_BINARY)[1]
+    
+    blur = cv2.GaussianBlur(th,(13,13), 11)
+    
+    heatmap_img = cv2.applyColorMap(blur, cv2.COLORMAP_JET)
+    super_imposed_img = cv2.addWeighted(heatmap_img, 0.5, img, 0.5, 0)
+    
+    cv2.imwrite(os.path.join(os.getcwd(), image_path.replace('faceimages','faceimages-heatmap')), super_imposed_img)
+    cv2.imshow('image', super_imposed_img)
+    cv2.waitKey(1500)
+    cv2.destroyAllWindows()
+    
+      
 if __name__ == "__main__":
     main()
